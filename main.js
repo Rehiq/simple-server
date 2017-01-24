@@ -72,7 +72,7 @@ var host = (args['host']) ? args['host'] : WEB_HOST;
 
 var HashPuppies = new Map();
 var secret = randomstring.generate(32);
-var session;
+var session = new NodeSession({secret: secret, 'lifetime': 10000});
 
 var normalizeSite = function (url) {
   //do shit
@@ -86,31 +86,19 @@ var app = function(req, res) {
 
   if (Url.pathname === "/forge") {
     console.log("forge");
-    var site = normalizeSite(Url.query.split('url=')[1]);
-    if (!req.session) {
-    // init
-      session = new NodeSession({secret: secret, 'lifetime': 10000});
-      // start session for an http request - response 
-      // this will define a session property to the request object 
-      session.startSession(req, res, function () {
-        // console.log(arguments);
-      });
-
+    var site = normalizeSite(Url.query.split('url=')[2]);
+    session.startSession(req, res, function(session) {
       var hush = randomstring.generate(32);
       req.session.put('hush', hush);
       HashPuppies.set('hush', hush);
-  }
+      res.end('success');
+    });
   } else {
-     session.startSession(req, res, function () {
-        // console.log(arguments);
-      });
-    console.log("not forge");
-    console.log(req.session.get('hush'));  
+    session.startSession(req, res, function() {
+      console.log('ko?', req.session.get('hush'));
+      res.end('ok');
+    });
   }
-
-
-  res.end("iYi")
-
 };
 
 // The atual server implmentation.

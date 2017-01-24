@@ -1,0 +1,14 @@
+{
+  "name": "SLP",
+  "description": "(Simple local proxy) - Simplifies working with remote apis from local front-end project",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "crypto-js": "^3.1.9-1",
+    "minimist": "1.2.0",
+    "node-session": "^1.2.1",
+    "node-static": "0.7.7",
+    "randomstring": "^1.1.5",
+    "request": "2.62.0"
+  }
+}

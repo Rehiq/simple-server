@@ -13,10 +13,9 @@ const http = require('http');
 const https = require('https');
 const minimist = require('minimist');
 const util = require('util');
-const crypto = require('crypto-js');
 const url = require('url');
-const NodeSession = require('node-session');
 const randomstring = require("randomstring");
+const connect = require('connect');
 
 
 /**
@@ -70,39 +69,78 @@ var host = (args['host']) ? args['host'] : WEB_HOST;
 // var file = new nodestatic.Server(
 //     webroot, {cache: 600, headers: {'X-Powered-By': 'node-static'}});
 
-var HashPuppies = new Map();
-var secret = randomstring.generate(32);
-var session = new NodeSession({secret: secret, 'lifetime': 10000});
+// var HashPuppies = new Map();
+// var session = new NodeSession({secret: secret, 'lifetime': 10000});
 
-var normalizeSite = function (url) {
-  //do shit
-  console.log(url);
-  return decodeURIComponent(url);
-}
+// var normalizeSite = function (url) {
+//   //do shit
+//   console.log(url);
+//   return decodeURIComponent(url);
+// }
 
-var app = function(req, res) {
+// var handler = function(req, res) {
 
-  var Url = url.parse(req.url);
+//   var Url = url.parse(req.url);
 
-  if (Url.pathname === "/forge") {
-    console.log("forge");
-    var site = normalizeSite(Url.query.split('url=')[2]);
-    session.startSession(req, res, function(session) {
-      var hush = randomstring.generate(32);
-      req.session.put('hush', hush);
-      HashPuppies.set('hush', hush);
-      res.end('success');
-    });
-  } else {
-    session.startSession(req, res, function() {
-      console.log('ko?', req.session.get('hush'));
-      res.end('ok');
-    });
-  }
-};
+//   if (Url.pathname === "/forge") {
+//     console.log("forge");
+//     var site = normalizeSite(Url.query.split('url=')[2]);
+//     session.startSession(req, res, function(session) {
+//       var hush = randomstring.generate(32);
+//       req.session.put('hush', hush);
+//       HashPuppies.set('hush', hush);
+//       res.end('success');
+//     });
+//   } else {
+//     session.startSession(req, res, function() {
+//       console.log('ko?', req.session.get('hush'));
+//       res.end('ok');
+//     });
+//   }
+// };
+
+var secret = [];
+secret.push(randomstring.generate(32));
+secret.push(randomstring.generate(32));
+
+
+var app = connect();
+
+// gzip/deflate outgoing responses
+const compression = require('compression');
+app.use(compression());
+
+// store session state in browser cookie
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+    name: 'FontSession',
+    keys: secret,
+    maxAge: 5 * 1000 //(1* 60 * 1000)one minute (5 sec)
+}));
+
+// parse urlencoded request bodies into req.body
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: false}));
+
 
 // The atual server implmentation.
 http.createServer(app).listen(port, host);
+
+//respond to /forge
+app.use('/forge',function (req, res, next) {
+   
+  var Url = url.parse(req.url);
+  console.log(Url);
+  req.session.url = "abv.bg"
+  res.end("From FOrge!\n");
+  // console.log("forge");
+  // next();
+});
+// respond to all requests
+app.use(function(req, res){
+  console.log(req.session.url);
+  res.end('Hello from Connect!\n');
+});
 
 if (port != process.env.PORT || host != process.env.IP) {
   console.log('Listening on ' + host + ':' + port);

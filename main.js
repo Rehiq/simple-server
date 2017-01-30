@@ -16,7 +16,16 @@ const util = require('util');
 const url = require('url');
 const randomstring = require("randomstring");
 const connect = require('connect');
-const logger = require('morgan')
+const logger = require('morgan');
+
+var mysql      = require('mysql');
+var conn = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'FontUser',
+  password : '?is8affraidof7',
+  database : 'FontUser'
+});
+conn.connect();
 
 
 /**
@@ -103,6 +112,13 @@ app.use('/forge',function (req, res, next) {
   console.log("forege");
   // 1/ generate random string
   // 2./Write down in db aliong with timeofcreation
+  var entry = {
+    id: null,
+    hash: randomstring.generate(32)
+  };
+  conn.query("INSERT INTO `urlHashes` SET ?", entry, function (error, results, fields) {
+    console.log(error, results, fields);
+  })
   // 3. onece written in db -> return to client
 
   // var Url = url.parse(req.url);

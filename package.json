@@ -10,6 +10,7 @@
     "cookie-session": "^2.0.0-alpha.2",
     "minimist": "1.2.0",
     "morgan": "^1.7.0",
+    "mysql": "^2.13.0",
     "randomstring": "^1.1.5",
     "request": "2.62.0",
     "serve-static": "^1.11.2"

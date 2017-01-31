@@ -17,6 +17,7 @@ const url = require('url');
 const randomstring = require("randomstring");
 const connect = require('connect');
 const logger = require('morgan');
+const helpers = require('./helpers.js');
 
 var mysql      = require('mysql');
 var conn = mysql.createConnection({
@@ -109,37 +110,55 @@ http.createServer(app).listen(port, host);
 
 //respond to /forge
 app.use('/forge',function (req, res, next) {
-  console.log("forege");
-  // 1/ generate random string
+
+  //1.1/ Get url for href
+  var URL = url.parse(req.url);
+  //if there is no query in hte url
+  if (URL.query == null) {
+    res = helpers.notFoundError(res);
+    res.end();
+    return;
+  }
+  var aUri = URL.query.split('url=');
+  //if the url is empty or not full or anything -> 404
+  if (aUri[1] == undefined || aUri[1] == '' || aUri[1] == null) {
+    res = helpers.notFoundError(res);
+    res.end();
+    return;
+  }
+  var hash = randomstring.generate(32);
   // 2./Write down in db aliong with timeofcreation
   var entry = {
     id: null,
-    hash: randomstring.generate(32)
+    hash: hash,
+    url: aUri[1] 
   };
   conn.query("INSERT INTO `urlHashes` SET ?", entry, function (error, results, fields) {
-    console.log(error, results, fields);
-  })
-  // 3. onece written in db -> return to client
+    if (error) {
+      res = helpers.returnMysqlError(error, res);
+      res.end();
+      return;
+    }
 
-  // var Url = url.parse(req.url);
-  // console.log(Url);
-  // req.session.url = "abv.bg"
-  res.end("From FOrge!\n");
-  // console.log("forge");
-  // next();
+  // 3. onece written in db -> return to client
+    res = helpers.json(res, {hash: hash});
+    res.end();
+    return;
+
+  });
 });
 
 
 // respond to all requests
 app.use(function(req, res) {
   // 1.) Parse url from request
-  var Url = url.parse(req.url);
-  console.log(Url);
+  var URL = url.parse(req.url);
+  var hash = URL.path.replace('/','');
   // 2.retrieve record from db optional and check for time passes
   // 3./ if time is not passed -> request and return content
   // 4../ else notify to recreate uuid
   // console.log(randomstring.generate(32));
-  console.log();
+
   res.end('Hello from Connect!\n');
 });
 

@@ -7,10 +7,6 @@
 -- Server version: 5.7.17-0ubuntu0.16.04.1
 -- PHP Version: 7.0.13-0ubuntu0.16.04.1
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
-
-
 --
 -- Create User
 --
@@ -18,11 +14,12 @@ GRANT ALL PRIVILEGES ON *.* TO 'FontUser'@'%' WITH GRANT OPTION;
 
 GRANT ALL PRIVILEGES ON `FontUser`.* TO 'FontUser'@'%';
 
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
 --
 -- Database: `FontUser`
 --
-CREATE DATABASE IF NOT EXISTS `FontUser` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `FontUser`;
 
 -- --------------------------------------------------------
 
@@ -33,6 +30,7 @@ USE `FontUser`;
 CREATE TABLE `urlHashes` (
   `id` int(11) NOT NULL,
   `hash` varchar(32) NOT NULL,
+  `url` longtext NOT NULL,
   `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
